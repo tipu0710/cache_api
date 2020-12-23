@@ -1,39 +1,40 @@
-// Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
 import 'dart:convert';
+import 'options.dart';
+import 'headers.dart';
+import 'redirect_record.dart';
 
-import 'package:dio/dio.dart';
+/// Response describes the http Response info.
+class Response<T> {
+  Response({
+    this.data,
+    this.headers,
+    this.request,
+    this.isRedirect,
+    this.statusCode,
+    this.statusMessage,
+    this.redirects,
+    this.extra,
+  });
 
-class CallBack<T> {
-  CallBack(
-      {this.data,
-        this.headers,
-        this.request,
-        this.isRedirect,
-        this.statusCode,
-        this.statusMessage,
-        this.redirects,
-        this.extra,});
-
-  final T data;
+  /// Response body. may have been transformed, please refer to [ResponseType].
+  T data;
 
   /// Response headers.
-  final Headers headers;
+  Headers headers;
 
   /// The corresponding request info.
-  final RequestOptions request;
+  RequestOptions request;
 
   /// Http status code.
-  final int statusCode;
+  int statusCode;
 
   /// Returns the reason phrase associated with the status code.
   /// The reason phrase must be set before the body is written
   /// to. Setting the reason phrase after writing to the body.
-  final String statusMessage;
+  String statusMessage;
 
   /// Custom field that you can retrieve it later in `then`.
-  final Map<String, dynamic> extra;
+  Map<String, dynamic> extra;
 
   /// Returns the series of redirects this connection has been through. The
   /// list will be empty if no redirects were followed. [redirects] will be
@@ -41,7 +42,7 @@ class CallBack<T> {
   ///
   /// ** Attention **: Whether this field is available depends on whether the
   /// implementation of the adapter supports it or not.
-  final List<RedirectRecord> redirects;
+  List<RedirectRecord> redirects;
 
   /// Whether this response is a redirect.
   /// ** Attention **: Whether this field is available depends on whether the

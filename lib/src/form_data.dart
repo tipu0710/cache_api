@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:dio/dio.dart';
-
-import 'fetchData/utils.dart';
+import 'multipart_file.dart';
+import 'utils.dart';
 
 /// A class to create readable "multipart/form-data" streams.
 /// It can be used to submit forms and file uploads to http server.
@@ -39,7 +38,7 @@ class FormData {
     _init();
     encodeMap(
       map,
-          (key, value) {
+      (key, value) {
         if (value == null) return null;
         if (value is MultipartFile) {
           files.add(MapEntry(key, value));

@@ -1,14 +1,336 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:dio/dio.dart';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'adapter.dart';
+import 'form_data.dart';
+import 'options.dart';
+import 'interceptor.dart';
+import 'headers.dart';
+import 'cancel_token.dart';
+import 'transformer.dart';
+import 'response.dart';
+import 'sdio_error.dart';
+import 'entry_stub.dart'
+// ignore: uri_does_not_exist
+if (dart.library.html) 'entry/dio_for_browser.dart'
+// ignore: uri_does_not_exist
+if (dart.library.io) 'entry/dio_for_native.dart';
 
-import 'package:offline_data/offline_data.dart';
+/// A powerful Http client for Dart, which supports Interceptors,
+/// Global configuration, FormData, File downloading etc. and Dio is
+/// very easy to use.
+///
+/// You can create a dio instance and config it by two ways:
+/// 1. create first , then config it
+///
+///   ```dart
+///    var dio = Dio();
+///    dio.options.baseUrl = "http://www.dtworkroom.com/doris/1/2.0.0/";
+///    dio.options.connectTimeout = 5000; //5s
+///    dio.options.receiveTimeout = 5000;
+///    dio.options.headers = {HttpHeaders.userAgentHeader: 'dio', 'common-header': 'xx'};
+///   ```
+/// 2. create and config it:
+///
+/// ```dart
+///   var dio = Dio(BaseOptions(
+///    baseUrl: "http://www.dtworkroom.com/doris/1/2.0.0/",
+///    connectTimeout: 5000,
+///    receiveTimeout: 5000,
+///    headers: {HttpHeaders.userAgentHeader: 'dio', 'common-header': 'xx'},
+///   ));
+///  ```
 
-abstract class HandlerMixin implements Handle {
+abstract class SDio {
+  factory SDio([BaseOptions options]) => createDio(options);
+
+  /// Default Request config. More see [BaseOptions] .
+  BaseOptions options;
+
+  Interceptors get interceptors;
+
+  HttpClientAdapter httpClientAdapter;
+
+  /// [transformer] allows changes to the request/response data before it is sent/received to/from the server
+  /// This is only applicable for request methods 'PUT', 'POST', and 'PATCH'.
+  Transformer transformer;
+
+  /// Shuts down the dio client.
+  ///
+  /// If [force] is `false` (the default) the [SDio] will be kept alive
+  /// until all active connections are done. If [force] is `true` any active
+  /// connections will be closed to immediately release all resources. These
+  /// closed connections will receive an error event to indicate that the client
+  /// was shut down. In both cases trying to establish a new connection after
+  /// calling [close] will throw an exception.
+  void close({bool force = false});
+
+  /// Handy method to make http GET request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> get<T>(
+      String path, {
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http GET request, which is a alias of [BaseDio.request].
+  Future<Response<T>> getUri<T>(
+      Uri uri, {
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> post<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> postUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> put<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> putUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  Future<Response<T>> head<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+      });
+
+  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  Future<Response<T>> headUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+      });
+
+  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> delete<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+      });
+
+  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> deleteUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+      });
+
+  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> patch<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  Future<Response<T>> patchUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Assure the final future state is succeed!
+  Future<Response<T>> resolve<T>(response);
+
+  /// Assure the final future state is failed!
+  Future<Response<T>> reject<T>(err);
+
+  /// Lock the current Dio instance.
+  ///
+  /// Dio will enqueue the incoming request tasks instead
+  /// send them directly when [interceptor.request] is locked.
+
+  void lock();
+
+  /// Unlock the current Dio instance.
+  ///
+  /// Dio instance dequeue the request task。
+  void unlock();
+
+  ///Clear the current Dio instance waiting queue.
+
+  void clear();
+
+  ///  Download the file and save it in local. The default http method is "GET",
+  ///  you can custom it by [Options.method].
+  ///
+  ///  [urlPath]: The file url.
+  ///
+  ///  [savePath]: The path to save the downloading file later. it can be a String or
+  ///  a callback:
+  ///  1. A path with String type, eg "xs.jpg"
+  ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
+  ///  ```dart
+  ///   await dio.download(url,(HttpHeaders responseHeaders){
+  ///      ...
+  ///      return "...";
+  ///    });
+  ///  ```
+  ///
+  ///  [onReceiveProgress]: The callback to listen downloading progress.
+  ///  please refer to [ProgressCallback].
+  ///
+  /// [deleteOnError] Whether delete the file when error occurs. The default value is [true].
+  ///
+  ///  [lengthHeader] : The real size of original file (not compressed).
+  ///  When file is compressed:
+  ///  1. If this value is 'content-length', the `total` argument of `onProgress` will be -1
+  ///  2. If this value is not 'content-length', maybe a custom header indicates the original
+  ///  file size , the `total` argument of `onProgress` will be this header value.
+  ///
+  ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
+  ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
+  ///
+  ///     await dio.download(url, "./example/flutter.svg",
+  ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
+  ///     onProgress: (received, total) {
+  ///       if (total != -1) {
+  ///        print((received / total * 100).toStringAsFixed(0) + "%");
+  ///       }
+  ///     });
+
+  Future<Response> download(
+      String urlPath,
+      savePath, {
+        ProgressCallback onReceiveProgress,
+        Map<String, dynamic> queryParameters,
+        CancelToken cancelToken,
+        bool deleteOnError = true,
+        String lengthHeader = Headers.contentLengthHeader,
+        data,
+        Options options,
+      });
+
+  ///  Download the file and save it in local. The default http method is "GET",
+  ///  you can custom it by [Options.method].
+  ///
+  ///  [uri]: The file url.
+  ///
+  ///  [savePath]: The path to save the downloading file later. it can be a String or
+  ///  a callback:
+  ///  1. A path with String type, eg "xs.jpg"
+  ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
+  ///  ```dart
+  ///   await dio.downloadUri(uri,(HttpHeaders responseHeaders){
+  ///      ...
+  ///      return "...";
+  ///    });
+  ///  ```
+  ///
+  ///  [onReceiveProgress]: The callback to listen downloading progress.
+  ///  please refer to [ProgressCallback].
+  ///
+  ///  [lengthHeader] : The real size of original file (not compressed).
+  ///  When file is compressed:
+  ///  1. If this value is 'content-length', the `total` argument of `onProgress` will be -1
+  ///  2. If this value is not 'content-length', maybe a custom header indicates the original
+  ///  file size , the `total` argument of `onProgress` will be this header value.
+  ///
+  ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
+  ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
+  ///
+  ///     await dio.downloadUri(uri, "./example/flutter.svg",
+  ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
+  ///     onProgress: (received, total) {
+  ///       if (total != -1) {
+  ///        print((received / total * 100).toStringAsFixed(0) + "%");
+  ///       }
+  ///     });
+  Future<Response> downloadUri(
+      Uri uri,
+      savePath, {
+        ProgressCallback onReceiveProgress,
+        CancelToken cancelToken,
+        bool deleteOnError = true,
+        String lengthHeader = Headers.contentLengthHeader,
+        data,
+        Options options,
+      });
+
+  /// Make http request with options.
+  ///
+  /// [path] The url path.
+  /// [data] The request data
+  /// [options] The request options.
+
+  Future<Response<T>> request<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        CancelToken cancelToken,
+        Options options,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+
+  /// Make http request with options.
+  ///
+  /// [uri] The uri.
+  /// [data] The request data
+  /// [options] The request options.
+  Future<Response<T>> requestUri<T>(
+      Uri uri, {
+        data,
+        CancelToken cancelToken,
+        Options options,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      });
+}
+
+abstract class DioMixin implements SDio {
   /// Default Request config. More see [BaseOptions].
-
   @override
   BaseOptions options;
 
@@ -36,12 +358,13 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http GET request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> get<T>(String path,
-      {Map<String, dynamic> queryParameters,
-      Options options,
-      CancelToken cancelToken,
-      ProgressCallback onReceiveProgress,
-      bool offlineModeEnable = true}) {
+  Future<Response<T>> get<T>(
+      String path, {
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onReceiveProgress,
+      }) {
     return request<T>(
       path,
       queryParameters: queryParameters,
@@ -53,34 +376,32 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http GET request, which is a alias of [BaseDio.request].
   @override
-  Future<CallBack<T>> getUri<T>(
-    Uri uri, {
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onReceiveProgress,
-  }){
+  Future<Response<T>> getUri<T>(
+      Uri uri, {
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onReceiveProgress,
+      }) {
     return requestUri<T>(
       uri,
       options: checkOptions('GET', options),
       onReceiveProgress: onReceiveProgress,
       cancelToken: cancelToken,
     );
-
   }
 
   /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> post<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-    bool offlineModeEnable = false,
-  }) async{
-    request<T>(
+  Future<Response<T>> post<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
+    return request<T>(
       path,
       data: data,
       options: checkOptions('POST', options),
@@ -93,14 +414,14 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> postUri<T>(
-    Uri uri, {
-    data,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) {
+  Future<Response<T>> postUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return requestUri<T>(
       uri,
       data: data,
@@ -113,16 +434,15 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> put<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-    bool offlineModeEnable = false,
-  }) {
+  Future<Response<T>> put<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return request<T>(
       path,
       data: data,
@@ -136,14 +456,14 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> putUri<T>(
-    Uri uri, {
-    data,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) async{
+  Future<Response<T>> putUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return requestUri<T>(
       uri,
       data: data,
@@ -152,18 +472,17 @@ abstract class HandlerMixin implements Handle {
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
-
   }
 
   /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
   @override
-  Future<CallBack<T>> head<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    Options options,
-    CancelToken cancelToken,
-  }) {
+  Future<Response<T>> head<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+      }) {
     return request<T>(
       path,
       data: data,
@@ -175,12 +494,12 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
   @override
-  Future<CallBack<T>> headUri<T>(
-    Uri uri, {
-    data,
-    Options options,
-    CancelToken cancelToken,
-  }){
+  Future<Response<T>> headUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+      }) {
     return requestUri<T>(
       uri,
       data: data,
@@ -191,14 +510,13 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> delete<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    Options options,
-    CancelToken cancelToken,
-    bool offlineModeEnable = false,
-  }){
+  Future<Response<T>> delete<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+      }) {
     return request<T>(
       path,
       data: data,
@@ -210,12 +528,12 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> deleteUri<T>(
-    Uri uri, {
-    data,
-    Options options,
-    CancelToken cancelToken,
-  }){
+  Future<Response<T>> deleteUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+      }) {
     return requestUri<T>(
       uri,
       data: data,
@@ -226,16 +544,15 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> patch<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-    bool offlineModeEnable = false,
-  }) {
+  Future<Response<T>> patch<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return request<T>(
       path,
       data: data,
@@ -249,14 +566,14 @@ abstract class HandlerMixin implements Handle {
 
   /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
   @override
-  Future<CallBack<T>> patchUri<T>(
-    Uri uri, {
-    data,
-    Options options,
-    CancelToken cancelToken,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) {
+  Future<Response<T>> patchUri<T>(
+      Uri uri, {
+        data,
+        Options options,
+        CancelToken cancelToken,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return requestUri<T>(
       uri,
       data: data,
@@ -269,25 +586,25 @@ abstract class HandlerMixin implements Handle {
 
   /// Assure the final future state is succeed!
   @override
-  Future<CallBack<T>> resolve<T>(response) {
+  Future<Response<T>> resolve<T>(response) {
     if (response is! Future) {
       response = Future.value(response);
     }
-    return response.then<CallBack<T>>((data) {
-      return assureCallBack<T>(data);
+    return response.then<Response<T>>((data) {
+      return assureResponse<T>(data);
     }, onError: (err) {
       // transform 'error' to 'success'
-      return assureCallBack<T>(err);
+      return assureResponse<T>(err);
     });
   }
 
   /// Assure the final future state is failed!
   @override
-  Future<CallBack<T>> reject<T>(err) {
+  Future<Response<T>> reject<T>(err) {
     if (err is! Future) {
       err = Future.error(err);
     }
-    return err.then<CallBack<T>>((v) {
+    return err.then<Response<T>>((v) {
       // transform 'success' to 'error'
       throw assureDioError(v);
     }, onError: (e) {
@@ -355,19 +672,19 @@ abstract class HandlerMixin implements Handle {
   ///        print((received / total * 100).toStringAsFixed(0) + '%');
   ///       }
   ///     });
+
   @override
   Future<Response> download(
-    String urlPath,
-    savePath, {
-    ProgressCallback onReceiveProgress,
-    Map<String, dynamic> queryParameters,
-    CancelToken cancelToken,
-    bool deleteOnError = true,
-    String lengthHeader = Headers.contentLengthHeader,
-    data,
-    Options options,
-    bool offlineModeEnable = true,
-  }) async {
+      String urlPath,
+      savePath, {
+        ProgressCallback onReceiveProgress,
+        Map<String, dynamic> queryParameters,
+        CancelToken cancelToken,
+        bool deleteOnError = true,
+        String lengthHeader = Headers.contentLengthHeader,
+        data,
+        Options options,
+      }) async {
     throw UnsupportedError('Unsupport download API in browser');
   }
 
@@ -408,15 +725,15 @@ abstract class HandlerMixin implements Handle {
   ///     });
   @override
   Future<Response> downloadUri(
-    Uri uri,
-    savePath, {
-    ProgressCallback onReceiveProgress,
-    CancelToken cancelToken,
-    bool deleteOnError = true,
-    String lengthHeader = Headers.contentLengthHeader,
-    data,
-    Options options,
-  }) {
+      Uri uri,
+      savePath, {
+        ProgressCallback onReceiveProgress,
+        CancelToken cancelToken,
+        bool deleteOnError = true,
+        String lengthHeader = Headers.contentLengthHeader,
+        data,
+        Options options,
+      }) {
     return download(
       uri.toString(),
       savePath,
@@ -435,15 +752,15 @@ abstract class HandlerMixin implements Handle {
   /// [data] The request data
   /// [options] The request options.
   @override
-  Future<CallBack<T>> request<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    CancelToken cancelToken,
-    Options options,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) async {
+  Future<Response<T>> request<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        CancelToken cancelToken,
+        Options options,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) async {
     return _request<T>(
       path,
       data: data,
@@ -461,14 +778,14 @@ abstract class HandlerMixin implements Handle {
   /// [data] The request data
   /// [options] The request options.
   @override
-  Future<CallBack<T>> requestUri<T>(
-    Uri uri, {
-    data,
-    CancelToken cancelToken,
-    Options options,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) {
+  Future<Response<T>> requestUri<T>(
+      Uri uri, {
+        data,
+        CancelToken cancelToken,
+        Options options,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) {
     return request(
       uri.toString(),
       data: data,
@@ -479,17 +796,17 @@ abstract class HandlerMixin implements Handle {
     );
   }
 
-  Future<CallBack<T>> _request<T>(
-    String path, {
-    data,
-    Map<String, dynamic> queryParameters,
-    CancelToken cancelToken,
-    Options options,
-    ProgressCallback onSendProgress,
-    ProgressCallback onReceiveProgress,
-  }) async {
+  Future<Response<T>> _request<T>(
+      String path, {
+        data,
+        Map<String, dynamic> queryParameters,
+        CancelToken cancelToken,
+        Options options,
+        ProgressCallback onSendProgress,
+        ProgressCallback onReceiveProgress,
+      }) async {
     if (_closed) {
-      throw DioError(error: "Dio can't establish new connection after closed.");
+      throw SDioError(error: "Dio can't establish new connection after closed.");
     }
     options ??= Options();
     if (options is RequestOptions) {
@@ -521,7 +838,7 @@ abstract class HandlerMixin implements Handle {
       return (data) async {
         var type = request ? (data is RequestOptions) : (data is Response);
         var lock =
-            request ? interceptors.requestLock : interceptors.responseLock;
+        request ? interceptors.requestLock : interceptors.responseLock;
         if (_isErrorOrException(data) || type) {
           return listenCancelForAsyncTask(
             cancelToken,
@@ -546,10 +863,9 @@ abstract class HandlerMixin implements Handle {
     // we can handle the return value of interceptor callback.
     Function _errorInterceptorWrapper(errInterceptor) {
       return (err) {
-        return checkIfNeedEnqueue(interceptors.errorLock, () {
+        return checkIfNeedEnqueue(interceptors.errorLock, (){
           if (err is! Response) {
-            return errInterceptor(assureDioError(err, requestOptions))
-                .then((e) {
+            return errInterceptor(assureDioError(err, requestOptions)).then((e){
               if (e is! Response) {
                 throw assureDioError(e ?? err, requestOptions);
               }
@@ -587,18 +903,18 @@ abstract class HandlerMixin implements Handle {
     });
 
     // Normalize errors, we convert error to the DioError
-    return future.then<CallBack<T>>((data) {
-      return assureCallBack<T>(data);
+    return future.then<Response<T>>((data) {
+      return assureResponse<T>(data);
     }).catchError((err) {
       if (err == null || _isErrorOrException(err)) {
         throw assureDioError(err, requestOptions);
       }
-      return assureCallBack<T>(err, requestOptions);
+      return assureResponse<T>(err, requestOptions);
     });
   }
 
   // Initiate Http requests
-  Future<CallBack<T>> _dispatchRequest<T>(RequestOptions options) async {
+  Future<Response<T>> _dispatchRequest<T>(RequestOptions options) async {
     var cancelToken = options.cancelToken;
     ResponseBody responseBody;
     try {
@@ -640,10 +956,10 @@ abstract class HandlerMixin implements Handle {
       if (statusOk) {
         return checkIfNeedEnqueue(interceptors.responseLock, () => ret);
       } else {
-        throw DioError(
+        throw SDioError(
           response: ret,
           error: 'Http status error [${responseBody.statusCode}]',
-          type: DioErrorType.RESPONSE,
+          type: SDioErrorType.RESPONSE,
         );
       }
     } catch (e) {
@@ -677,7 +993,7 @@ abstract class HandlerMixin implements Handle {
       int length;
       if (data is Stream) {
         assert(data is Stream<List>,
-            'Stream type must be `Stream<List>`, but ${data.runtimeType} is found.');
+        'Stream type must be `Stream<List>`, but ${data.runtimeType} is found.');
         stream = data;
         options.headers.keys.any((String key) {
           if (key.toLowerCase() == Headers.contentLengthHeader) {
@@ -689,7 +1005,7 @@ abstract class HandlerMixin implements Handle {
       } else if (data is FormData) {
         if (data is FormData) {
           options.headers[Headers.contentTypeHeader] =
-              'multipart/form-data; boundary=${data.boundary}';
+          'multipart/form-data; boundary=${data.boundary}';
         }
         stream = data.finalize();
         length = data.length;
@@ -720,7 +1036,7 @@ abstract class HandlerMixin implements Handle {
       }
       var complete = 0;
       var byteStream =
-          stream.transform<Uint8List>(StreamTransformer.fromHandlers(
+      stream.transform<Uint8List>(StreamTransformer.fromHandlers(
         handleData: (data, sink) {
           if (options.cancelToken != null && options.cancelToken.isCancelled) {
             sink
@@ -740,13 +1056,13 @@ abstract class HandlerMixin implements Handle {
       if (options.sendTimeout > 0) {
         byteStream.timeout(Duration(milliseconds: options.sendTimeout),
             onTimeout: (sink) {
-          sink.addError(DioError(
-            request: options,
-            error: 'Sending timeout[${options.connectTimeout}ms]',
-            type: DioErrorType.SEND_TIMEOUT,
-          ));
-          sink.close();
-        });
+              sink.addError(SDioError(
+                request: options,
+                error: 'Sending timeout[${options.connectTimeout}ms]',
+                type: SDioErrorType.SEND_TIMEOUT,
+              ));
+              sink.close();
+            });
       }
       return byteStream;
     } else {
@@ -761,7 +1077,7 @@ abstract class HandlerMixin implements Handle {
       ..addAll(queryParameters ?? {});
     final optBaseUrl = (opt is RequestOptions) ? opt.baseUrl : null;
     final optConnectTimeout =
-        (opt is RequestOptions) ? opt.connectTimeout : null;
+    (opt is RequestOptions) ? opt.connectTimeout : null;
     return RequestOptions(
       method: (opt.method ?? options.method)?.toUpperCase() ?? 'GET',
       headers: (Map.from(options.headers))..addAll(opt.headers),
@@ -772,13 +1088,13 @@ abstract class HandlerMixin implements Handle {
       sendTimeout: opt.sendTimeout ?? options.sendTimeout ?? 0,
       receiveTimeout: opt.receiveTimeout ?? options.receiveTimeout ?? 0,
       responseType:
-          opt.responseType ?? options.responseType ?? ResponseType.json,
+      opt.responseType ?? options.responseType ?? ResponseType.json,
       extra: (Map.from(options.extra))..addAll(opt.extra),
       contentType:
-          opt.contentType ?? options.contentType ?? Headers.jsonContentType,
+      opt.contentType ?? options.contentType ?? Headers.jsonContentType,
       validateStatus: opt.validateStatus ??
           options.validateStatus ??
-          (int status) {
+              (int status) {
             return status >= 200 && status < 300;
           },
       receiveDataWhenStatusError: opt.receiveDataWhenStatusError ??
@@ -806,18 +1122,18 @@ abstract class HandlerMixin implements Handle {
     }
   }
 
-  DioError assureDioError(err, [RequestOptions requestOptions]) {
-    DioError dioError;
-    if (err is DioError) {
+  SDioError assureDioError(err, [RequestOptions requestOptions]) {
+    SDioError dioError;
+    if (err is SDioError) {
       dioError = err;
     } else {
-      dioError = DioError(error: err);
+      dioError = SDioError(error: err);
     }
     dioError.request = dioError.request ?? requestOptions;
     return dioError;
   }
 
-  CallBack<T> assureCallBack<T>(response, [RequestOptions requestOptions]) {
+  Response<T> assureResponse<T>(response, [RequestOptions requestOptions]) {
     if (response is Response<T>) {
       response.request = response.request ?? requestOptions;
     } else if (response is! Response) {
@@ -834,26 +1150,6 @@ abstract class HandlerMixin implements Handle {
         statusMessage: response.statusMessage,
       );
     }
-    return response as CallBack;
-  }
-
-  CallBack<T> assureResponse<T>(response, [RequestOptions requestOptions]) {
-    if (response is Response<T>) {
-      response.request = response.request ?? requestOptions;
-    } else if (response is! Response) {
-      response = Response<T>(data: response, request: requestOptions);
-    } else {
-      T data = response.data;
-      response = Response<T>(
-        data: data,
-        headers: response.headers,
-        request: response.request,
-        statusCode: response.statusCode,
-        isRedirect: response.isRedirect,
-        redirects: response.redirects,
-        statusMessage: response.statusMessage,
-      );
-    }
-    return response as CallBack;
+    return response;
   }
 }
