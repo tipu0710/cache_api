@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   http_parser: ">=0.0.1 <4.0.0"
   path: ^1.6.4
+  hive: ^1.4.4+1
+  path_provider: ^1.6.24
 
 dev_dependencies:
   flutter_test:

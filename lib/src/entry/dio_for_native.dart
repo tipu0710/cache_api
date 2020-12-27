@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:hive/hive.dart';
 import 'package:offline_data/src/adapters/io_adapter.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../adapter.dart';
 import '../cancel_token.dart';
@@ -13,9 +15,12 @@ import '../sdio_error.dart';
 SDio createDio([BaseOptions options]) => DioForNative(options);
 
 class DioForNative with DioMixin implements SDio {
+
+  Box box;
   /// Create Dio instance with default [Options].
   /// It's mostly just one Dio instance in your application.
   DioForNative([BaseOptions options]) {
+    openHive();
     this.options = options ?? BaseOptions();
     httpClientAdapter = DefaultHttpClientAdapter();
   }
@@ -278,5 +283,10 @@ class DioForNative with DioMixin implements SDio {
       data: data,
       options: options,
     );
+  }
+
+  Future<void> openHive()async{
+    Hive.init((await getApplicationDocumentsDirectory()).path);
+
   }
 }

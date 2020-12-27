@@ -38,10 +38,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() async {
     SDio sDio = new SDio();
-    Response response = await sDio.get("https://jsonplaceholder.typicode.com/todos/1");
-    setState(() {
-      _counter = response.data;
-    });
+    Response response = await sDio.get("https://jsonplaceholder.typicode.com/todos/1", storeData: true);
+    print(response?.data);
+    if(response != null){
+      print(response?.statusCode);
+      print(response?.statusMessage);
+      setState(() {
+        _counter = response.data;
+      });
+    }
   }
 
   @override
