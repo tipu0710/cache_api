@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .get("https://jsonplaceholder.typicode.com/todos/1", storeData: true);
     if (response != null) {
       setState(() {
+        print(response.statusMessage);
         _counter = response.data;
       });
     }

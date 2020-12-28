@@ -1,7 +1,7 @@
 import 'options.dart';
 import 'sdio.dart';
 
-SDio createDio([BaseOptions options]) {
+SDio createSDio([BaseOptions options]) {
   print("jhgfv");
   throw UnsupportedError('');
 }

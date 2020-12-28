@@ -10,10 +10,10 @@ typedef OnHttpClientCreate = dynamic Function(HttpClient client);
 
 HttpClientAdapter createAdapter() => DefaultHttpClientAdapter();
 
-/// The default HttpClientAdapter for Dio.
+/// The default HttpClientAdapter for SDio.
 class DefaultHttpClientAdapter implements HttpClientAdapter {
-  /// [Dio] will create HttpClient when it is needed.
-  /// If [onHttpClientCreate] is provided, [Dio] will call
+  /// [SDio] will create HttpClient when it is needed.
+  /// If [onHttpClientCreate] is provided, [SDio] will call
   /// it when a HttpClient created.
   OnHttpClientCreate onHttpClientCreate;
 

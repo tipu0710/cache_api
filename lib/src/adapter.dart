@@ -6,9 +6,9 @@ import 'redirect_record.dart';
 typedef CancelWrapper = Future Function(Future);
 typedef VoidCallback = dynamic Function();
 
-/// HttpAdapter is a bridge between Dio and HttpClient.
+/// HttpAdapter is a bridge between SDio and HttpClient.
 ///
-/// Dio: Implements standard and friendly API for developer.
+/// SDio: Implements standard and friendly API for developer.
 ///
 /// HttpClient: It is the real object that makes Http
 /// requests.
@@ -16,10 +16,10 @@ typedef VoidCallback = dynamic Function();
 /// We can use any HttpClient not just "dart:io:HttpClient" to
 /// make the Http request. All we need is providing a [HttpClientAdapter].
 ///
-/// The default HttpClientAdapter for Dio is [DefaultHttpClientAdapter].
+/// The default HttpClientAdapter for SDio is [DefaultHttpClientAdapter].
 ///
 /// ```dart
-/// dio.httpClientAdapter = DefaultHttpClientAdapter();
+/// sDio.httpClientAdapter = DefaultHttpClientAdapter();
 /// ```
 abstract class HttpClientAdapter {
   /// We should implement this method to make real http requests.

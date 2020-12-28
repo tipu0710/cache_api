@@ -20,32 +20,32 @@ import 'entry_stub.dart'
     if (dart.library.io) 'entry/dio_for_native.dart';
 
 /// A powerful Http client for Dart, which supports Interceptors,
-/// Global configuration, FormData, File downloading etc. and Dio is
+/// Global configuration, FormData, File downloading etc. and SDio is
 /// very easy to use.
 ///
-/// You can create a dio instance and config it by two ways:
+/// You can create a sDio instance and config it by two ways:
 /// 1. create first , then config it
 ///
 ///   ```dart
-///    var dio = Dio();
-///    dio.options.baseUrl = "http://www.dtworkroom.com/doris/1/2.0.0/";
-///    dio.options.connectTimeout = 5000; //5s
-///    dio.options.receiveTimeout = 5000;
-///    dio.options.headers = {HttpHeaders.userAgentHeader: 'dio', 'common-header': 'xx'};
+///    var sDio = SDio();
+///    sDio.options.baseUrl = "http://www.dtworkroom.com/doris/1/2.0.0/";
+///    sDio.options.connectTimeout = 5000; //5s
+///    sDio.options.receiveTimeout = 5000;
+///    sDio.options.headers = {HttpHeaders.userAgentHeader: 'sDio', 'common-header': 'xx'};
 ///   ```
 /// 2. create and config it:
 ///
 /// ```dart
-///   var dio = Dio(BaseOptions(
+///   var sDio = SDio(BaseOptions(
 ///    baseUrl: "http://www.dtworkroom.com/doris/1/2.0.0/",
 ///    connectTimeout: 5000,
 ///    receiveTimeout: 5000,
-///    headers: {HttpHeaders.userAgentHeader: 'dio', 'common-header': 'xx'},
+///    headers: {HttpHeaders.userAgentHeader: 'sDio', 'common-header': 'xx'},
 ///   ));
 ///  ```
 
 abstract class SDio {
-  factory SDio([BaseOptions options]) => createDio(options);
+  factory SDio([BaseOptions options]) => createSDio(options);
 
   /// Default Request config. More see [BaseOptions] .
   BaseOptions options;
@@ -58,7 +58,7 @@ abstract class SDio {
   /// This is only applicable for request methods 'PUT', 'POST', and 'PATCH'.
   Transformer transformer;
 
-  /// Shuts down the dio client.
+  /// Shuts down the sDio client.
   ///
   /// If [force] is `false` (the default) the [SDio] will be kept alive
   /// until all active connections are done. If [force] is `true` any active
@@ -72,7 +72,7 @@ abstract class SDio {
 
   Future<void> init();
 
-  /// Handy method to make http GET request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http GET request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -83,7 +83,7 @@ abstract class SDio {
     Duration duration,
   });
 
-  /// Handy method to make http GET request, which is a alias of [BaseDio.request].
+  /// Handy method to make http GET request, which is a alias of [BaseSDio.request].
   Future<Response<T>> getUri<T>(
     Uri uri, {
     Options options,
@@ -92,7 +92,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> post<T>(
     String path, {
     data,
@@ -104,7 +104,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> postUri<T>(
     Uri uri, {
     data,
@@ -115,7 +115,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> put<T>(
     String path, {
     data,
@@ -127,7 +127,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> putUri<T>(
     Uri uri, {
     data,
@@ -138,7 +138,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
   Future<Response<T>> head<T>(
     String path, {
     data,
@@ -147,7 +147,7 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
   Future<Response<T>> headUri<T>(
     Uri uri, {
     data,
@@ -155,7 +155,7 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> delete<T>(
     String path, {
     data,
@@ -164,7 +164,7 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> deleteUri<T>(
     Uri uri, {
     data,
@@ -172,7 +172,7 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> patch<T>(
     String path, {
     data,
@@ -184,7 +184,7 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
   Future<Response<T>> patchUri<T>(
     Uri uri, {
     data,
@@ -201,19 +201,19 @@ abstract class SDio {
   /// Assure the final future state is failed!
   Future<Response<T>> reject<T>(err);
 
-  /// Lock the current Dio instance.
+  /// Lock the current SDio instance.
   ///
-  /// Dio will enqueue the incoming request tasks instead
+  /// SDio will enqueue the incoming request tasks instead
   /// send them directly when [interceptor.request] is locked.
 
   void lock();
 
-  /// Unlock the current Dio instance.
+  /// Unlock the current SDio instance.
   ///
-  /// Dio instance dequeue the request task。
+  /// SDio instance dequeue the request task。
   void unlock();
 
-  ///Clear the current Dio instance waiting queue.
+  ///Clear the current SDio instance waiting queue.
 
   void clear();
 
@@ -227,7 +227,7 @@ abstract class SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.download(url,(HttpHeaders responseHeaders){
+  ///   await sDio.download(url,(HttpHeaders responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -247,7 +247,7 @@ abstract class SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.download(url, "./example/flutter.svg",
+  ///     await sDio.download(url, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -277,7 +277,7 @@ abstract class SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.downloadUri(uri,(HttpHeaders responseHeaders){
+  ///   await sDio.downloadUri(uri,(HttpHeaders responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -295,7 +295,7 @@ abstract class SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.downloadUri(uri, "./example/flutter.svg",
+  ///     await sDio.downloadUri(uri, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -344,12 +344,12 @@ abstract class SDio {
   });
 }
 
-abstract class DioMixin implements SDio {
+abstract class SDioMixin implements SDio {
   /// Default Request config. More see [BaseOptions].
   @override
   BaseOptions options;
 
-  /// Each Dio instance has a interceptor by which you can intercept requests or responses before they are
+  /// Each SDio instance has a interceptor by which you can intercept requests or responses before they are
   /// handled by `then` or `catchError`. the [interceptor] field
   /// contains a [RequestInterceptor] and a [ResponseInterceptor] instance.
   final Interceptors _interceptors = Interceptors();
@@ -376,7 +376,7 @@ abstract class DioMixin implements SDio {
     httpClientAdapter.close(force: force);
   }
 
-  /// Handy method to make http GET request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http GET request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> get<T>(
     String path, {
@@ -425,7 +425,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http GET request, which is a alias of [BaseDio.request].
+  /// Handy method to make http GET request, which is a alias of [BaseSDio.request].
   @override
   Future<Response<T>> getUri<T>(
     Uri uri, {
@@ -464,7 +464,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> post<T>(
     String path, {
@@ -509,7 +509,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> postUri<T>(
     Uri uri, {
@@ -552,7 +552,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> put<T>(
     String path, {
@@ -597,7 +597,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> putUri<T>(
     Uri uri, {
@@ -640,7 +640,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
   @override
   Future<Response<T>> head<T>(
     String path, {
@@ -659,7 +659,7 @@ abstract class DioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
   @override
   Future<Response<T>> headUri<T>(
     Uri uri, {
@@ -675,7 +675,7 @@ abstract class DioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> delete<T>(
     String path, {
@@ -693,7 +693,7 @@ abstract class DioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> deleteUri<T>(
     Uri uri, {
@@ -709,7 +709,7 @@ abstract class DioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> patch<T>(
     String path, {
@@ -754,7 +754,7 @@ abstract class DioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
   @override
   Future<Response<T>> patchUri<T>(
     Uri uri, {
@@ -819,30 +819,30 @@ abstract class DioMixin implements SDio {
     }
     return err.then<Response<T>>((v) {
       // transform 'success' to 'error'
-      throw assureDioError(v);
+      throw assureSDioError(v);
     }, onError: (e) {
-      throw assureDioError(e);
+      throw assureSDioError(e);
     });
   }
 
-  /// Lock the current Dio instance.
+  /// Lock the current SDio instance.
   ///
-  /// Dio will enqueue the incoming request tasks instead
+  /// SDio will enqueue the incoming request tasks instead
   /// send them directly when [interceptor.request] is locked.
   @override
   void lock() {
     interceptors.requestLock.lock();
   }
 
-  /// Unlock the current Dio instance.
+  /// Unlock the current SDio instance.
   ///
-  /// Dio instance dequeue the request task。
+  /// SDio instance dequeue the request task。
   @override
   void unlock() {
     interceptors.requestLock.unlock();
   }
 
-  ///Clear the current Dio instance waiting queue.
+  ///Clear the current SDio instance waiting queue.
   @override
   void clear() {
     interceptors.requestLock.clear();
@@ -858,7 +858,7 @@ abstract class DioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.download(url,(HttpHeaders responseHeaders){
+  ///   await sDio.download(url,(HttpHeaders responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -878,7 +878,7 @@ abstract class DioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.download(url, './example/flutter.svg',
+  ///     await sDio.download(url, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -911,7 +911,7 @@ abstract class DioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.downloadUri(uri,(HttpHeaders responseHeaders){
+  ///   await sDio.downloadUri(uri,(HttpHeaders responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -929,7 +929,7 @@ abstract class DioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.downloadUri(uri, './example/flutter.svg',
+  ///     await sDio.downloadUri(uri, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -1020,7 +1020,7 @@ abstract class DioMixin implements SDio {
   }) async {
     if (_closed) {
       throw SDioError(
-          error: "Dio can't establish new connection after closed.");
+          error: "SDio can't establish new connection after closed.");
     }
     options ??= Options();
     if (options is RequestOptions) {
@@ -1062,7 +1062,7 @@ abstract class DioMixin implements SDio {
                   if (!request) data.request = data.request ?? requestOptions;
                   return interceptor(data).then((e) => e ?? data);
                 } else {
-                  throw assureDioError(data, requestOptions);
+                  throw assureSDioError(data, requestOptions);
                 }
               });
             }),
@@ -1079,10 +1079,10 @@ abstract class DioMixin implements SDio {
       return (err) {
         return checkIfNeedEnqueue(interceptors.errorLock, () {
           if (err is! Response) {
-            return errInterceptor(assureDioError(err, requestOptions))
+            return errInterceptor(assureSDioError(err, requestOptions))
                 .then((e) {
               if (e is! Response) {
-                throw assureDioError(e ?? err, requestOptions);
+                throw assureSDioError(e ?? err, requestOptions);
               }
               return e;
             });
@@ -1117,12 +1117,12 @@ abstract class DioMixin implements SDio {
       future = future.catchError(_errorInterceptorWrapper(interceptor.onError));
     });
 
-    // Normalize errors, we convert error to the DioError
+    // Normalize errors, we convert error to the SDioError
     return future.then<Response<T>>((data) {
       return assureResponse<T>(data);
     }).catchError((err) {
       if (err == null || _isErrorOrException(err)) {
-        throw assureDioError(err, requestOptions);
+        throw assureSDioError(err, requestOptions);
       }
       return assureResponse<T>(err, requestOptions);
     });
@@ -1178,7 +1178,7 @@ abstract class DioMixin implements SDio {
         );
       }
     } catch (e) {
-      throw assureDioError(e, options);
+      throw assureSDioError(e, options);
     }
   }
 
@@ -1337,15 +1337,15 @@ abstract class DioMixin implements SDio {
     }
   }
 
-  SDioError assureDioError(err, [RequestOptions requestOptions]) {
-    SDioError dioError;
+  SDioError assureSDioError(err, [RequestOptions requestOptions]) {
+    SDioError sDioError;
     if (err is SDioError) {
-      dioError = err;
+      sDioError = err;
     } else {
-      dioError = SDioError(error: err);
+      sDioError = SDioError(error: err);
     }
-    dioError.request = dioError.request ?? requestOptions;
-    return dioError;
+    sDioError.request = sDioError.request ?? requestOptions;
+    return sDioError;
   }
 
   Response<T> assureResponse<T>(response, [RequestOptions requestOptions]) {

@@ -7,7 +7,7 @@ import 'utils.dart';
 /// A class to create readable "multipart/form-data" streams.
 /// It can be used to submit forms and file uploads to http server.
 class FormData {
-  static const String _BOUNDARY_PRE_TAG = '--dio-boundary-';
+  static const String _BOUNDARY_PRE_TAG = '--sDio-boundary-';
   static const _BOUNDARY_LENGTH = _BOUNDARY_PRE_TAG.length + 10;
 
   String _boundary;

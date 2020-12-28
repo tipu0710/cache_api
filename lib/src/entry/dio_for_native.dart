@@ -11,14 +11,14 @@ import '../headers.dart';
 import '../options.dart';
 import '../sdio_error.dart';
 
-SDio createDio([BaseOptions options]) => DioForNative(options);
+SDio createSDio([BaseOptions options]) => SDioForNative(options);
 
-class DioForNative with DioMixin implements SDio {
+class SDioForNative with SDioMixin implements SDio {
   Box box;
 
-  /// Create Dio instance with default [Options].
-  /// It's mostly just one Dio instance in your application.
-  DioForNative([BaseOptions options]) {
+  /// Create SDio instance with default [Options].
+  /// It's mostly just one SDio instance in your application.
+  SDioForNative([BaseOptions options]) {
     this.options = options ?? BaseOptions();
     httpClientAdapter = DefaultHttpClientAdapter();
   }
@@ -33,7 +33,7 @@ class DioForNative with DioMixin implements SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.download(url,(Headers responseHeaders){
+  ///   await sDio.download(url,(Headers responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -53,7 +53,7 @@ class DioForNative with DioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.download(url, "./example/flutter.svg",
+  ///     await sDio.download(url, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -175,7 +175,7 @@ class DioForNative with DioMixin implements SDio {
           try {
             await subscription.cancel();
           } finally {
-            completer.completeError(assureDioError(err));
+            completer.completeError(assureSDioError(err));
           }
         });
       },
@@ -186,14 +186,14 @@ class DioForNative with DioMixin implements SDio {
           await raf.close();
           completer.complete(response);
         } catch (e) {
-          completer.completeError(assureDioError(e));
+          completer.completeError(assureSDioError(e));
         }
       },
       onError: (e) async {
         try {
           await _closeAndDelete();
         } finally {
-          completer.completeError(assureDioError(e));
+          completer.completeError(assureSDioError(e));
         }
       },
       cancelOnError: true,
@@ -235,7 +235,7 @@ class DioForNative with DioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await dio.downloadUri(uri,(Headers responseHeaders){
+  ///   await sDio.downloadUri(uri,(Headers responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -253,7 +253,7 @@ class DioForNative with DioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await dio.downloadUri(uri, './example/flutter.svg',
+  ///     await sDio.downloadUri(uri, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {

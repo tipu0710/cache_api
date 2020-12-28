@@ -13,10 +13,10 @@ import 'utils.dart';
 /// [Transformer] allows changes to the request/response data before
 /// it is sent/received to/from the server.
 ///
-/// Dio has already implemented a [DefaultTransformer], and as the default
+/// SDio has already implemented a [DefaultTransformer], and as the default
 /// [Transformer]. If you want to custom the transformation of
 /// request/response data, you can provide a [Transformer] by your self, and
-/// replace the [DefaultTransformer] by setting the [dio.Transformer].
+/// replace the [DefaultTransformer] by setting the [sDio.Transformer].
 
 abstract class Transformer {
   /// `transformRequest` allows changes to the request data before it is
@@ -43,9 +43,9 @@ abstract class Transformer {
   }
 }
 
-/// The default [Transformer] for [Dio]. If you want to custom the transformation of
+/// The default [Transformer] for [SDio]. If you want to custom the transformation of
 /// request/response data, you can provide a [Transformer] by your self, and
-/// replace the [DefaultTransformer] by setting the [dio.Transformer].
+/// replace the [DefaultTransformer] by setting the [sDio.Transformer].
 
 typedef JsonDecodeCallback = dynamic Function(String);
 
