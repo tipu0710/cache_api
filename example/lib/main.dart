@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:offline_data/offline_data.dart';
 
 void main() {
@@ -30,23 +34,35 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Map<String, dynamic> _counter = {"-1": "No data"};
-  Map<String, dynamic> body = {
-    "title": 'foo',
-    "body": 'bar',
-    "userId": 1,
-  };
+
+  String _connectionStatus = 'init';
+  final Connectivity _connectivity = Connectivity();
+  StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   void _incrementCounter() async {
     SDio sDio = new SDio();
-    Response response = await sDio.get("https://jsonplaceholder.typicode.com/todos/1", storeData: true);
-    print(response?.data);
-    if(response != null){
-      print(response?.statusCode);
-      print(response?.statusMessage);
+    await sDio.init();
+    Response response = await sDio
+        .get("https://jsonplaceholder.typicode.com/todos/1", storeData: true);
+    if (response != null) {
       setState(() {
         _counter = response.data;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -55,11 +71,23 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Text(
-          '$_counter',
-          style: Theme.of(context).textTheme.headline4,
-        ),
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: _connectionStatus==ConnectivityResult.none.toString()?Container(
+              color: Colors.red,
+              height: 30,
+              child: Center(child: Text("Offline", style: TextStyle(color: Colors.white),)),
+            ):Container(),
+          ),
+          Center(
+            child: Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -67,5 +95,32 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> initConnectivity() async {
+    ConnectivityResult result;
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    switch (result) {
+      case ConnectivityResult.wifi:
+      case ConnectivityResult.mobile:
+      case ConnectivityResult.none:
+        setState(() => _connectionStatus = result.toString());
+        break;
+      default:
+        setState(() => _connectionStatus = 'Failed to get connectivity.');
+        break;
+    }
   }
 }

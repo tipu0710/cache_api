@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
+
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'adapter.dart';
 import 'form_data.dart';
@@ -66,6 +68,10 @@ abstract class SDio {
   /// calling [close] will throw an exception.
   void close({bool force = false});
 
+  Box box;
+
+  Future<void> init();
+
   /// Handy method to make http GET request, which is a alias of  [BaseDio.request].
   Future<Response<T>> get<T>(
     String path, {
@@ -73,7 +79,8 @@ abstract class SDio {
     Options options,
     CancelToken cancelToken,
     ProgressCallback onReceiveProgress,
-        bool storeData,
+    bool storeData,
+    Duration duration,
   });
 
   /// Handy method to make http GET request, which is a alias of [BaseDio.request].
@@ -82,6 +89,7 @@ abstract class SDio {
     Options options,
     CancelToken cancelToken,
     ProgressCallback onReceiveProgress,
+    bool storeData,
   });
 
   /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
@@ -93,7 +101,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-        bool storeData,
+    bool storeData,
   });
 
   /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
@@ -104,6 +112,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
+    bool storeData,
   });
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
@@ -115,7 +124,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-        bool storeData,
+    bool storeData,
   });
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
@@ -126,6 +135,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
+    bool storeData,
   });
 
   /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
@@ -171,7 +181,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-        bool storeData,
+    bool storeData,
   });
 
   /// Handy method to make http PATCH request, which is a alias of  [BaseDio.request].
@@ -182,6 +192,7 @@ abstract class SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
+    bool storeData,
   });
 
   /// Assure the final future state is succeed!
@@ -354,6 +365,11 @@ abstract class DioMixin implements SDio {
 
   bool _closed = false;
 
+  static const String _GET = "@GET";
+  static const String _POST = "@POST";
+  static const String _PUT = "@PUT";
+  static const String _PATCH = "@PATCH";
+
   @override
   void close({bool force = false}) {
     _closed = true;
@@ -368,7 +384,8 @@ abstract class DioMixin implements SDio {
     Options options,
     CancelToken cancelToken,
     ProgressCallback onReceiveProgress,
-    bool storeData,
+    bool storeData = false,
+        Duration duration = const Duration(days: 2),
   }) async {
     Response response;
     try {
@@ -378,17 +395,32 @@ abstract class DioMixin implements SDio {
         options: checkOptions('GET', options),
         onReceiveProgress: onReceiveProgress,
         cancelToken: cancelToken,
-        storeData: storeData,
       );
 
-    } on SDioError catch(e){
-      if(storeData??false){
-        Response response1 = new Response(
-            data: {"Hi": "hi"},
-            statusCode: e?.response?.statusCode,
-            statusMessage: "Data from store");
-        return response1;
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> d = response.data;
+        Map<String, dynamic> data = {
+          "data": d,
+          "initDate": DateTime.now().toString(),
+          "expiredTime": duration.inMilliseconds.toString(),
+          "url": path+_GET
+        };
+
+        box.put(path + _GET, json.encode(data));
       }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(path + _GET);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data['data'],
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
     }
     return response;
   }
@@ -400,13 +432,36 @@ abstract class DioMixin implements SDio {
     Options options,
     CancelToken cancelToken,
     ProgressCallback onReceiveProgress,
-  }) {
-    return requestUri<T>(
-      uri,
-      options: checkOptions('GET', options),
-      onReceiveProgress: onReceiveProgress,
-      cancelToken: cancelToken,
-    );
+    bool storeData = false,
+  }) async {
+    Response response;
+    try {
+      response = await requestUri<T>(
+        uri,
+        options: checkOptions('GET', options),
+        onReceiveProgress: onReceiveProgress,
+        cancelToken: cancelToken,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(uri.path + _GET, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(uri.path + _GET);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
+    }
+    return response;
   }
 
   /// Handy method to make http POST request, which is a alias of  [BaseDio.request].
@@ -431,11 +486,25 @@ abstract class DioMixin implements SDio {
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
-        storeData: storeData,
       );
-    } catch (e) {
-      //print(e);
-      //print(response.data);
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(path + _POST, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(path + _POST);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
     }
     return response;
   }
@@ -449,15 +518,38 @@ abstract class DioMixin implements SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-  }) {
-    return requestUri<T>(
-      uri,
-      data: data,
-      options: checkOptions('POST', options),
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
+    bool storeData = false,
+  }) async {
+    Response response;
+    try {
+      response = await requestUri<T>(
+        uri,
+        data: data,
+        options: checkOptions('POST', options),
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(uri.path + _POST, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(uri.path + _POST);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
+    }
+    return response;
   }
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
@@ -470,18 +562,39 @@ abstract class DioMixin implements SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-    bool storeData,
-  }) {
-    return request<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: checkOptions('PUT', options),
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-      storeData: storeData,
-    );
+    bool storeData = false,
+  }) async {
+    Response response;
+    try {
+      response = await request<T>(
+        path,
+        data: data,
+        options: checkOptions('PUT', options),
+        queryParameters: queryParameters,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(path + _PUT, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(path + _PUT);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
+    }
+    return response;
   }
 
   /// Handy method to make http PUT request, which is a alias of  [BaseDio.request].
@@ -493,15 +606,38 @@ abstract class DioMixin implements SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-  }) {
-    return requestUri<T>(
-      uri,
-      data: data,
-      options: checkOptions('PUT', options),
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
+    bool storeData = false,
+  }) async {
+    Response response;
+    try {
+      response = await requestUri<T>(
+        uri,
+        data: data,
+        options: checkOptions('PUT', options),
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(uri.path + _PUT, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(uri.path + _PUT);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
+    }
+    return response;
   }
 
   /// Handy method to make http HEAD request, which is a alias of [BaseDio.request].
@@ -520,7 +656,6 @@ abstract class DioMixin implements SDio {
       queryParameters: queryParameters,
       options: checkOptions('HEAD', options),
       cancelToken: cancelToken,
-      storeData: storeData,
     );
   }
 
@@ -588,17 +723,33 @@ abstract class DioMixin implements SDio {
   }) async {
     Response response;
     try {
-      response = await request<T>(path,
-          data: data,
-          queryParameters: queryParameters,
-          options: checkOptions('PATCH', options),
-          cancelToken: cancelToken,
-          onSendProgress: onSendProgress,
-          onReceiveProgress: onReceiveProgress,
-          storeData: storeData);
-    } catch (e) {
-      //print(e);
-      //print(response.extra);
+      response = await request<T>(
+        path,
+        data: data,
+        options: checkOptions('PATCH', options),
+        queryParameters: queryParameters,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(path + _PATCH, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(path + _PATCH);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
     }
     return response;
   }
@@ -612,15 +763,38 @@ abstract class DioMixin implements SDio {
     CancelToken cancelToken,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-  }) {
-    return requestUri<T>(
-      uri,
-      data: data,
-      options: checkOptions('PATCH', options),
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
+    bool storeData = false,
+  }) async {
+    Response response;
+    try {
+      response = await requestUri<T>(
+        uri,
+        data: data,
+        options: checkOptions('PATCH', options),
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      if (box != null && box.isOpen) {
+        Map<String, dynamic> data = response.data;
+        box.put(uri.path + _PATCH, json.encode(data));
+      }
+    } on SDioError catch (e) {
+      if (storeData && box != null && box.isOpen) {
+        String s = box.get(uri.path + _PATCH);
+        if (s != null) {
+          Map<String, dynamic> data = json.decode(s);
+          Response response1 = new Response(
+              data: data,
+              statusCode: e?.response?.statusCode,
+              statusMessage: "Data from store");
+          return response1;
+        }
+      }
+      throw e;
+    }
+    return response;
   }
 
   /// Assure the final future state is succeed!
@@ -799,7 +973,6 @@ abstract class DioMixin implements SDio {
     Options options,
     ProgressCallback onSendProgress,
     ProgressCallback onReceiveProgress,
-    bool storeData,
   }) async {
     return _request<T>(
       path,
@@ -809,7 +982,6 @@ abstract class DioMixin implements SDio {
       options: options,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
-      storeData: storeData ?? false,
     );
   }
 
@@ -837,14 +1009,15 @@ abstract class DioMixin implements SDio {
     );
   }
 
-  Future<Response<T>> _request<T>(String path,
-      {data,
-      Map<String, dynamic> queryParameters,
-      CancelToken cancelToken,
-      Options options,
-      ProgressCallback onSendProgress,
-      ProgressCallback onReceiveProgress,
-      bool storeData}) async {
+  Future<Response<T>> _request<T>(
+    String path, {
+    data,
+    Map<String, dynamic> queryParameters,
+    CancelToken cancelToken,
+    Options options,
+    ProgressCallback onSendProgress,
+    ProgressCallback onReceiveProgress,
+  }) async {
     if (_closed) {
       throw SDioError(
           error: "Dio can't establish new connection after closed.");
@@ -1194,4 +1367,23 @@ abstract class DioMixin implements SDio {
     }
     return response;
   }
+
+  @override
+  Future<void> init() async {
+    Hive.init((await getApplicationDocumentsDirectory()).path);
+    box = await Hive.openBox("SMART_DIO");
+    var keys = [];
+    for (int i = 0; i < box.length; i++) {
+      Map<String, dynamic> data = json.decode(box.getAt(i));
+      DateTime now = DateTime.now();
+      DateTime initDate = DateTime.parse(data['initDate']);
+      Duration duration =
+      Duration(milliseconds: int.parse(data['expiredTime']));
+      if(now.difference(initDate)> duration){
+        keys.add(data['url']);
+      }
+    }
+    box.deleteAll(keys);
+  }
 }
+
