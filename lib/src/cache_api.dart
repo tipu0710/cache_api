@@ -17,7 +17,7 @@ import 'response.dart';
 import 'cache_api_error.dart';
 import 'entry_stub.dart'
 // ignore: uri_does_not_exist
-    if (dart.library.io) 'entry/dio_for_native.dart';
+    if (dart.library.io) 'entry/cache_api_for_native.dart';
 
 /// A powerful Http client for Dart, which supports Interceptors,
 /// Global configuration, FormData, File downloading etc. and CacheApi is

@@ -1,9 +1,8 @@
-# offline_data
+# cache_api
 
-A new Flutter package.
+A Http client that cache the json response, which can be used in offline mode. CacheApi also supports Interceptors, Global configuration, FormData, Request Cancellation, File downloading, Timeout etc.
 
 ## Getting Started
-
 This project is a starting point for a Dart
 [package](https://flutter.dev/developing-packages/),
 a library module containing code that can be shared easily across
