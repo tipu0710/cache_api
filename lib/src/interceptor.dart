@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'options.dart';
-import 'sdio_error.dart';
+import 'cache_api_error.dart';
 import 'response.dart';
 
 typedef InterceptorSendCallback = dynamic Function(RequestOptions options);
-typedef InterceptorErrorCallback = dynamic Function(SDioError e);
-typedef InterceptorSuccessCallback = dynamic Function(Response e);
+typedef InterceptorErrorCallback = dynamic Function(CacheApiError e);
+typedef InterceptorSuccessCallback = dynamic Function(ApiResponse e);
 typedef EnqueueCallback = FutureOr Function();
 
 /// Add lock/unlock API for interceptors.
@@ -60,18 +60,18 @@ class Lock {
   }
 }
 
-///  SDio instance may have interceptor(s) by which you can intercept
+///  CacheApi instance may have interceptor(s) by which you can intercept
 ///  requests or responses before they are handled by `then` or `catchError`.
 class Interceptor {
   /// The callback will be executed before the request is initiated.
   ///
   /// If you want to resolve the request with some custom data，
-  /// you can return a [Response] object or return [sDio.resolve].
+  /// you can return a [ApiResponse] object or return [cacheApi.resolve].
   /// If you want to reject the request with a error message,
-  /// you can return a [SDioError] object or return [sDio.reject] .
+  /// you can return a [CacheApiError] object or return [cacheApi.reject] .
   /// If you want to continue the request, return the [Options] object.
   /// ```dart
-  ///  Future onRequest(RequestOptions options) => sDio.resolve('fake data');
+  ///  Future onRequest(RequestOptions options) => cacheApi.resolve('fake data');
   ///  ...
   ///  print(response.data) // 'fake data';
   /// ```
@@ -80,16 +80,16 @@ class Interceptor {
   /// The callback will be executed on success.
   ///
   /// If you want to reject the request with a error message,
-  /// you can return a [SDioError] object or return [sDio.reject] .
-  /// If you want to continue the request, return the [Response] object.
-  Future onResponse(Response response) async => response;
+  /// you can return a [CacheApiError] object or return [cacheApi.reject] .
+  /// If you want to continue the request, return the [ApiResponse] object.
+  Future onResponse(ApiResponse response) async => response;
 
   /// The callback will be executed on error.
   ///
   /// If you want to resolve the request with some custom data，
-  /// you can return a [Response] object or return [sDio.resolve].
-  /// If you want to continue the request, return the [SDioError] object.
-  Future onError(SDioError err) async => err;
+  /// you can return a [ApiResponse] object or return [cacheApi.resolve].
+  /// If you want to continue the request, return the [CacheApiError] object.
+  Future onError(CacheApiError err) async => err;
 }
 
 class InterceptorsWrapper extends Interceptor {
@@ -113,14 +113,14 @@ class InterceptorsWrapper extends Interceptor {
   }
 
   @override
-  Future onResponse(Response response) async {
+  Future onResponse(ApiResponse response) async {
     if (_onResponse != null) {
       return _onResponse(response);
     }
   }
 
   @override
-  Future onError(SDioError err) async {
+  Future onError(CacheApiError err) async {
     if (_onError != null) {
       return _onError(err);
     }

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../offline_data.dart';
+import '../cache_api.dart';
 
 
 /// [LogInterceptor] is used to print logs during network requests.
@@ -27,10 +27,10 @@ class LogInterceptor extends Interceptor {
   /// Print request data [Options.data]
   bool requestBody;
 
-  /// Print [Response.data]
+  /// Print [ApiResponse.data]
   bool responseBody;
 
-  /// Print [Response.headers]
+  /// Print [ApiResponse.headers]
   bool responseHeader;
 
   /// Print error message
@@ -73,7 +73,7 @@ class LogInterceptor extends Interceptor {
   }
 
   @override
-  Future onError(SDioError err) async {
+  Future onError(CacheApiError err) async {
     if (error) {
       logPrint('*** DioError ***:');
       logPrint('uri: ${err.request.uri}');
@@ -86,12 +86,12 @@ class LogInterceptor extends Interceptor {
   }
 
   @override
-  Future onResponse(Response response) async {
+  Future onResponse(ApiResponse response) async {
     logPrint('*** Response ***');
     _printResponse(response);
   }
 
-  void _printResponse(Response response) {
+  void _printResponse(ApiResponse response) {
     _printKV('uri', response.request?.uri);
     if (responseHeader) {
       _printKV('statusCode', response.statusCode);

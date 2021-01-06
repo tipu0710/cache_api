@@ -16,7 +16,7 @@ import 'cancel_token.dart';
 typedef ProgressCallback = void Function(int count, int total);
 
 /// ResponseType indicates which transformation should
-/// be automatically applied to the response data by SDio.
+/// be automatically applied to the response data by CacheApi.
 enum ResponseType {
   /// Transform the response data to JSON object only when the
   /// content-type of response is "application/json" .
@@ -25,7 +25,7 @@ enum ResponseType {
   /// Get the response stream without any transformation. The
   /// Response data will be a `ResponseBody` instance.
   ///
-  ///    Response<ResponseBody> rs = await SDio().get<ResponseBody>(
+  ///    Response<ResponseBody> rs = await CacheApi().get<ResponseBody>(
   ///      url,
   ///      options: Options(
   ///        responseType: ResponseType.stream,
@@ -46,8 +46,8 @@ typedef ResponseDecoder = String Function(
 typedef RequestEncoder = List<int> Function(
     String request, RequestOptions options);
 
-/// The common config for the SDio instance.
-/// `sDio.options` is a instance of [BaseOptions]
+/// The common config for the CacheApi instance.
+/// `cacheApi.options` is a instance of [BaseOptions]
 class BaseOptions extends _RequestConfig {
   BaseOptions({
     String method,
@@ -130,12 +130,12 @@ class BaseOptions extends _RequestConfig {
   Map<String, dynamic> queryParameters;
 
   /// Timeout in milliseconds for opening url.
-  /// [SDio] will throw the [SDioError] with [SDioErrorType.CONNECT_TIMEOUT] type
+  /// [CacheApi] will throw the [CacheApiError] with [CacheApiErrorType.CONNECT_TIMEOUT] type
   ///  when time out.
   int connectTimeout;
 }
 
-/// Every request can pass an [Options] object which will be merged with [SDio.options]
+/// Every request can pass an [Options] object which will be merged with [CacheApi.options]
 class Options extends _RequestConfig {
  Options({
     String method,
@@ -362,12 +362,12 @@ class _RequestConfig {
   Map<String, dynamic> headers;
 
   /// Timeout in milliseconds for sending data.
-  /// [SDio] will throw the [SDioError] with [SDioErrorType.SEND_TIMEOUT] type
+  /// [CacheApi] will throw the [CacheApiError] with [CacheApiErrorType.SEND_TIMEOUT] type
   ///  when time out.
   int sendTimeout;
 
   ///  Timeout in milliseconds for receiving data.
-  ///  [SDio] will throw the [SDioError] with [SDioErrorType.RECEIVE_TIMEOUT] type
+  ///  [CacheApi] will throw the [CacheApiError] with [CacheApiErrorType.RECEIVE_TIMEOUT] type
   ///  when time out.
   ///
   /// [0] meanings no timeout limit.
@@ -375,7 +375,7 @@ class _RequestConfig {
 
   /// The request Content-Type. The default value is [ContentType.json].
   /// If you want to encode request body with 'application/x-www-form-urlencoded',
-  /// you can set `ContentType.parse('application/x-www-form-urlencoded')`, and [SDio]
+  /// you can set `ContentType.parse('application/x-www-form-urlencoded')`, and [CacheApi]
   /// will automatically encode the request body.
   set contentType(String contentType) {
     headers[Headers.contentTypeHeader] = contentType?.trim();
@@ -386,7 +386,7 @@ class _RequestConfig {
   /// [responseType] indicates the type of data that the server will respond with
   /// options which defined in [ResponseType] are `json`, `stream`, `plain`.
   ///
-  /// The default value is `json`, sDio will parse response string to json object automatically
+  /// The default value is `json`, cacheApi will parse response string to json object automatically
   /// when the content-type of response is 'application/json'.
   ///
   /// If you want to receive response data with binary bytes, for example,

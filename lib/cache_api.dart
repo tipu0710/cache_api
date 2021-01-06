@@ -1,8 +1,8 @@
-library offline_data;
+library cache_api;
 
-export 'src/sdio.dart';
+export 'src/cache_api.dart';
 export 'src/form_data.dart';
-export 'src/sdio_error.dart';
+export 'src/cache_api_error.dart';
 export 'src/transformer.dart';
 export 'src/interceptor.dart';
 export 'src/options.dart';

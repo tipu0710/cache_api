@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'sdio_error.dart';
+import 'cache_api_error.dart';
 
 /// You can cancel a request by using a cancel token.
 /// One token can be shared with different requests.
@@ -11,15 +11,15 @@ class CancelToken {
   }
 
   /// Whether is throw by [cancel]
-  static bool isCancel(SDioError e) {
-    return e.type == SDioErrorType.CANCEL;
+  static bool isCancel(CacheApiError e) {
+    return e.type == CacheApiErrorType.CANCEL;
   }
 
   /// If request have been canceled, save the cancel Error.
-  SDioError _cancelError;
+  CacheApiError _cancelError;
 
   /// If request have been canceled, save the cancel Error.
-  SDioError get cancelError => _cancelError;
+  CacheApiError get cancelError => _cancelError;
 
   Completer _completer;
 
@@ -31,7 +31,7 @@ class CancelToken {
 
   /// Cancel the request
   void cancel([dynamic reason]) {
-    _cancelError = SDioError(type: SDioErrorType.CANCEL, error: reason);
+    _cancelError = CacheApiError(type: CacheApiErrorType.CANCEL, error: reason);
     _completer.complete();
   }
 }

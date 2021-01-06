@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:offline_data/offline_data.dart';
+import 'package:offline_data/cache_api.dart';
 
 void main() {
   runApp(MyApp());
@@ -40,9 +40,9 @@ class _MyHomePageState extends State<MyHomePage> {
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   void _incrementCounter() async {
-    SDio sDio = new SDio();
-    await sDio.init();
-    Response response = await sDio
+    CacheApi cacheApi = new CacheApi();
+    await cacheApi.init();
+    ApiResponse response = await cacheApi
         .get("https://jsonplaceholder.typicode.com/todos/1", storeData: true);
     if (response != null) {
       setState(() {

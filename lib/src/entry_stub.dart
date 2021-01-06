@@ -1,7 +1,6 @@
 import 'options.dart';
-import 'sdio.dart';
+import 'cache_api.dart';
 
-SDio createSDio([BaseOptions options]) {
-  print("jhgfv");
+CacheApi createCacheApi([BaseOptions options]) {
   throw UnsupportedError('');
 }

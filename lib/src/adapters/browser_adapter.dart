@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import '../sdio_error.dart';
+import '../cache_api_error.dart';
 import '../options.dart';
 import '../adapter.dart';
 import 'dart:html';
@@ -56,8 +56,8 @@ class BrowserHttpClientAdapter implements HttpClientAdapter {
 
       reader.onError.first.then((error) {
         completer.completeError(
-          SDioError(
-            type: SDioErrorType.RESPONSE,
+          CacheApiError(
+            type: CacheApiErrorType.RESPONSE,
             error: error,
             request: options,
           ),
@@ -71,8 +71,8 @@ class BrowserHttpClientAdapter implements HttpClientAdapter {
       // Unfortunately, the underlying XMLHttpRequest API doesn't expose any
       // specific information about the error itself.
       completer.completeError(
-        SDioError(
-          type: SDioErrorType.RESPONSE,
+        CacheApiError(
+          type: CacheApiErrorType.RESPONSE,
           error: 'XMLHttpRequest error.',
           request: options,
         ),

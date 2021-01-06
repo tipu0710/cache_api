@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import '../adapter.dart';
 import '../options.dart';
-import '../sdio_error.dart';
+import '../cache_api_error.dart';
 import '../redirect_record.dart';
 
 typedef OnHttpClientCreate = dynamic Function(HttpClient client);
@@ -35,10 +35,10 @@ class DefaultHttpClientAdapter implements HttpClientAdapter {
     Future requestFuture = _httpClient.openUrl(options.method, options.uri);
 
     void _throwConnectingTimeout() {
-      throw SDioError(
+      throw CacheApiError(
         request: options,
         error: 'Connecting timed out [${options.connectTimeout}ms]',
-        type: SDioErrorType.CONNECT_TIMEOUT,
+        type: CacheApiErrorType.CONNECT_TIMEOUT,
       );
     }
 

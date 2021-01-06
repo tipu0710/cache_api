@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:http_parser/http_parser.dart';
 
 import 'adapter.dart';
-import 'sdio_error.dart';
+import 'cache_api_error.dart';
 import 'headers.dart';
 import 'options.dart';
 import 'utils.dart';
@@ -13,10 +13,10 @@ import 'utils.dart';
 /// [Transformer] allows changes to the request/response data before
 /// it is sent/received to/from the server.
 ///
-/// SDio has already implemented a [DefaultTransformer], and as the default
+/// CacheApi has already implemented a [DefaultTransformer], and as the default
 /// [Transformer]. If you want to custom the transformation of
 /// request/response data, you can provide a [Transformer] by your self, and
-/// replace the [DefaultTransformer] by setting the [sDio.Transformer].
+/// replace the [DefaultTransformer] by setting the [cacheApi.Transformer].
 
 abstract class Transformer {
   /// `transformRequest` allows changes to the request data before it is
@@ -43,9 +43,9 @@ abstract class Transformer {
   }
 }
 
-/// The default [Transformer] for [SDio]. If you want to custom the transformation of
+/// The default [Transformer] for [CacheApi]. If you want to custom the transformation of
 /// request/response data, you can provide a [Transformer] by your self, and
-/// replace the [DefaultTransformer] by setting the [sDio.Transformer].
+/// replace the [DefaultTransformer] by setting the [cacheApi.Transformer].
 
 typedef JsonDecodeCallback = dynamic Function(String);
 
@@ -119,10 +119,10 @@ class DefaultTransformer extends Transformer {
             .timeout(Duration(milliseconds: options.receiveTimeout));
       } on TimeoutException {
         await subscription.cancel();
-        throw SDioError(
+        throw CacheApiError(
           request: options,
           error: 'Receiving data timeout[${options.receiveTimeout}ms]',
-          type: SDioErrorType.RECEIVE_TIMEOUT,
+          type: CacheApiErrorType.RECEIVE_TIMEOUT,
         );
       }
     } else {

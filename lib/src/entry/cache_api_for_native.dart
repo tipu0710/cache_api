@@ -6,19 +6,19 @@ import 'package:offline_data/src/adapters/io_adapter.dart';
 import '../adapter.dart';
 import '../cancel_token.dart';
 import '../response.dart';
-import '../sdio.dart';
+import '../cache_api.dart';
 import '../headers.dart';
 import '../options.dart';
-import '../sdio_error.dart';
+import '../cache_api_error.dart';
 
-SDio createSDio([BaseOptions options]) => SDioForNative(options);
+CacheApi createCacheApi([BaseOptions options]) => CacheApiForNative(options);
 
-class SDioForNative with SDioMixin implements SDio {
+class CacheApiForNative with CacheApiMixin implements CacheApi {
   Box box;
 
-  /// Create SDio instance with default [Options].
-  /// It's mostly just one SDio instance in your application.
-  SDioForNative([BaseOptions options]) {
+  /// Create CacheApi instance with default [Options].
+  /// It's mostly just one CacheApi instance in your application.
+  CacheApiForNative([BaseOptions options]) {
     this.options = options ?? BaseOptions();
     httpClientAdapter = DefaultHttpClientAdapter();
   }
@@ -33,7 +33,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.download(url,(Headers responseHeaders){
+  ///   await cacheApi.download(url,(Headers responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -53,7 +53,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.download(url, "./example/flutter.svg",
+  ///     await cacheApi.download(url, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -61,7 +61,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///       }
   ///     });
   @override
-  Future<Response> download(
+  Future<ApiResponse> download(
     String urlPath,
     savePath, {
     ProgressCallback onReceiveProgress,
@@ -82,7 +82,7 @@ class SDioForNative with SDioMixin implements SDio {
 
     // Receive data with stream.
     options.responseType = ResponseType.stream;
-    Response<ResponseBody> response;
+    ApiResponse<ResponseBody> response;
     try {
       response = await request<ResponseBody>(
         urlPath,
@@ -91,8 +91,8 @@ class SDioForNative with SDioMixin implements SDio {
         queryParameters: queryParameters,
         cancelToken: cancelToken ?? CancelToken(),
       );
-    } on SDioError catch (e) {
-      if (e.type == SDioErrorType.RESPONSE) {
+    } on CacheApiError catch (e) {
+      if (e.type == CacheApiErrorType.RESPONSE) {
         if (e.response.request.receiveDataWhenStatusError) {
           var res = await transformer.transformResponse(
             e.response.request..responseType = ResponseType.json,
@@ -127,7 +127,7 @@ class SDioForNative with SDioMixin implements SDio {
     var raf = file.openSync(mode: FileMode.write);
 
     //Create a Completer to notify the success/error state.
-    var completer = Completer<Response>();
+    var completer = Completer<ApiResponse>();
     var future = completer.future;
     var received = 0;
 
@@ -175,7 +175,7 @@ class SDioForNative with SDioMixin implements SDio {
           try {
             await subscription.cancel();
           } finally {
-            completer.completeError(assureSDioError(err));
+            completer.completeError(assureCacheApiError(err));
           }
         });
       },
@@ -186,14 +186,14 @@ class SDioForNative with SDioMixin implements SDio {
           await raf.close();
           completer.complete(response);
         } catch (e) {
-          completer.completeError(assureSDioError(e));
+          completer.completeError(assureCacheApiError(e));
         }
       },
       onError: (e) async {
         try {
           await _closeAndDelete();
         } finally {
-          completer.completeError(assureSDioError(e));
+          completer.completeError(assureCacheApiError(e));
         }
       },
       cancelOnError: true,
@@ -211,11 +211,11 @@ class SDioForNative with SDioMixin implements SDio {
         await subscription.cancel();
         await _closeAndDelete();
         if (err is TimeoutException) {
-          throw SDioError(
+          throw CacheApiError(
             request: response.request,
             error:
                 'Receiving data timeout[${response.request.receiveTimeout}ms]',
-            type: SDioErrorType.RECEIVE_TIMEOUT,
+            type: CacheApiErrorType.RECEIVE_TIMEOUT,
           );
         } else {
           throw err;
@@ -235,7 +235,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.downloadUri(uri,(Headers responseHeaders){
+  ///   await cacheApi.downloadUri(uri,(Headers responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -253,7 +253,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.downloadUri(uri, './example/flutter.svg',
+  ///     await cacheApi.downloadUri(uri, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -261,7 +261,7 @@ class SDioForNative with SDioMixin implements SDio {
   ///       }
   ///     });
   @override
-  Future<Response> downloadUri(
+  Future<ApiResponse> downloadUri(
     Uri uri,
     savePath, {
     ProgressCallback onReceiveProgress,

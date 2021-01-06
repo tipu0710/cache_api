@@ -29,9 +29,9 @@ Encoding encodingForCharset(String charset, [Encoding fallback = latin1]) {
   return encoding ?? fallback;
 }
 
-typedef SDioEncodeHandler = Function(String key, Object value);
+typedef CacheApiEncodeHandler = Function(String key, Object value);
 
-String encodeMap(data, SDioEncodeHandler handler, {bool encode = true}) {
+String encodeMap(data, CacheApiEncodeHandler handler, {bool encode = true}) {
   var urlData = StringBuffer('');
   var first = true;
   var leftBracket = encode ? '%5B' : '[';

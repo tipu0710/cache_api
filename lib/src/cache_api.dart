@@ -14,38 +14,38 @@ import 'headers.dart';
 import 'cancel_token.dart';
 import 'transformer.dart';
 import 'response.dart';
-import 'sdio_error.dart';
+import 'cache_api_error.dart';
 import 'entry_stub.dart'
 // ignore: uri_does_not_exist
     if (dart.library.io) 'entry/dio_for_native.dart';
 
 /// A powerful Http client for Dart, which supports Interceptors,
-/// Global configuration, FormData, File downloading etc. and SDio is
+/// Global configuration, FormData, File downloading etc. and CacheApi is
 /// very easy to use.
 ///
-/// You can create a sDio instance and config it by two ways:
+/// You can create a cacheApi instance and config it by two ways:
 /// 1. create first , then config it
 ///
 ///   ```dart
-///    var sDio = SDio();
-///    sDio.options.baseUrl = "http://www.dtworkroom.com/doris/1/2.0.0/";
-///    sDio.options.connectTimeout = 5000; //5s
-///    sDio.options.receiveTimeout = 5000;
-///    sDio.options.headers = {HttpHeaders.userAgentHeader: 'sDio', 'common-header': 'xx'};
+///    var cacheApi = CacheApi();
+///    cacheApi.options.baseUrl = "http://www.dtworkroom.com/doris/1/2.0.0/";
+///    cacheApi.options.connectTimeout = 5000; //5s
+///    cacheApi.options.receiveTimeout = 5000;
+///    cacheApi.options.headers = {HttpHeaders.userAgentHeader: 'cacheApi', 'common-header': 'xx'};
 ///   ```
 /// 2. create and config it:
 ///
 /// ```dart
-///   var sDio = SDio(BaseOptions(
+///   var cacheApi = CacheApi(BaseOptions(
 ///    baseUrl: "http://www.dtworkroom.com/doris/1/2.0.0/",
 ///    connectTimeout: 5000,
 ///    receiveTimeout: 5000,
-///    headers: {HttpHeaders.userAgentHeader: 'sDio', 'common-header': 'xx'},
+///    headers: {HttpHeaders.userAgentHeader: 'cacheApi', 'common-header': 'xx'},
 ///   ));
 ///  ```
 
-abstract class SDio {
-  factory SDio([BaseOptions options]) => createSDio(options);
+abstract class CacheApi {
+  factory CacheApi([BaseOptions options]) => createCacheApi(options);
 
   /// Default Request config. More see [BaseOptions] .
   BaseOptions options;
@@ -58,9 +58,9 @@ abstract class SDio {
   /// This is only applicable for request methods 'PUT', 'POST', and 'PATCH'.
   Transformer transformer;
 
-  /// Shuts down the sDio client.
+  /// Shuts down the cacheApi client.
   ///
-  /// If [force] is `false` (the default) the [SDio] will be kept alive
+  /// If [force] is `false` (the default) the [CacheApi] will be kept alive
   /// until all active connections are done. If [force] is `true` any active
   /// connections will be closed to immediately release all resources. These
   /// closed connections will receive an error event to indicate that the client
@@ -72,8 +72,8 @@ abstract class SDio {
 
   Future<void> init();
 
-  /// Handy method to make http GET request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> get<T>(
+  /// Handy method to make http GET request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic> queryParameters,
     Options options,
@@ -83,8 +83,8 @@ abstract class SDio {
     Duration duration,
   });
 
-  /// Handy method to make http GET request, which is a alias of [BaseSDio.request].
-  Future<Response<T>> getUri<T>(
+  /// Handy method to make http GET request, which is a alias of [BaseCacheApi.request].
+  Future<ApiResponse<T>> getUri<T>(
     Uri uri, {
     Options options,
     CancelToken cancelToken,
@@ -92,8 +92,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> post<T>(
+  /// Handy method to make http POST request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> post<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -104,8 +104,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> postUri<T>(
+  /// Handy method to make http POST request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> postUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -115,8 +115,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> put<T>(
+  /// Handy method to make http PUT request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> put<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -127,8 +127,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> putUri<T>(
+  /// Handy method to make http PUT request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> putUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -138,8 +138,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
-  Future<Response<T>> head<T>(
+  /// Handy method to make http HEAD request, which is a alias of [BaseCacheApi.request].
+  Future<ApiResponse<T>> head<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -147,16 +147,16 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
-  Future<Response<T>> headUri<T>(
+  /// Handy method to make http HEAD request, which is a alias of [BaseCacheApi.request].
+  Future<ApiResponse<T>> headUri<T>(
     Uri uri, {
     data,
     Options options,
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> delete<T>(
+  /// Handy method to make http DELETE request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> delete<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -164,16 +164,16 @@ abstract class SDio {
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> deleteUri<T>(
+  /// Handy method to make http DELETE request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> deleteUri<T>(
     Uri uri, {
     data,
     Options options,
     CancelToken cancelToken,
   });
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> patch<T>(
+  /// Handy method to make http PATCH request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> patch<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -184,8 +184,8 @@ abstract class SDio {
     bool storeData,
   });
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
-  Future<Response<T>> patchUri<T>(
+  /// Handy method to make http PATCH request, which is a alias of  [BaseCacheApi.request].
+  Future<ApiResponse<T>> patchUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -196,24 +196,24 @@ abstract class SDio {
   });
 
   /// Assure the final future state is succeed!
-  Future<Response<T>> resolve<T>(response);
+  Future<ApiResponse<T>> resolve<T>(response);
 
   /// Assure the final future state is failed!
-  Future<Response<T>> reject<T>(err);
+  Future<ApiResponse<T>> reject<T>(err);
 
-  /// Lock the current SDio instance.
+  /// Lock the current CacheApi instance.
   ///
-  /// SDio will enqueue the incoming request tasks instead
+  /// CacheApi will enqueue the incoming request tasks instead
   /// send them directly when [interceptor.request] is locked.
 
   void lock();
 
-  /// Unlock the current SDio instance.
+  /// Unlock the current CacheApi instance.
   ///
-  /// SDio instance dequeue the request task。
+  /// CacheApi instance dequeue the request task。
   void unlock();
 
-  ///Clear the current SDio instance waiting queue.
+  ///Clear the current CacheApi instance waiting queue.
 
   void clear();
 
@@ -227,7 +227,7 @@ abstract class SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.download(url,(HttpHeaders responseHeaders){
+  ///   await cacheApi.download(url,(HttpHeaders responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -247,7 +247,7 @@ abstract class SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.download(url, "./example/flutter.svg",
+  ///     await cacheApi.download(url, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -255,7 +255,7 @@ abstract class SDio {
   ///       }
   ///     });
 
-  Future<Response> download(
+  Future<ApiResponse> download(
     String urlPath,
     savePath, {
     ProgressCallback onReceiveProgress,
@@ -277,7 +277,7 @@ abstract class SDio {
   ///  1. A path with String type, eg "xs.jpg"
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.downloadUri(uri,(HttpHeaders responseHeaders){
+  ///   await cacheApi.downloadUri(uri,(HttpHeaders responseHeaders){
   ///      ...
   ///      return "...";
   ///    });
@@ -295,14 +295,14 @@ abstract class SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.downloadUri(uri, "./example/flutter.svg",
+  ///     await cacheApi.downloadUri(uri, "./example/flutter.svg",
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: "*"}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
   ///        print((received / total * 100).toStringAsFixed(0) + "%");
   ///       }
   ///     });
-  Future<Response> downloadUri(
+  Future<ApiResponse> downloadUri(
     Uri uri,
     savePath, {
     ProgressCallback onReceiveProgress,
@@ -319,7 +319,7 @@ abstract class SDio {
   /// [data] The request data
   /// [options] The request options.
 
-  Future<Response<T>> request<T>(
+  Future<ApiResponse<T>> request<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -334,7 +334,7 @@ abstract class SDio {
   /// [uri] The uri.
   /// [data] The request data
   /// [options] The request options.
-  Future<Response<T>> requestUri<T>(
+  Future<ApiResponse<T>> requestUri<T>(
     Uri uri, {
     data,
     CancelToken cancelToken,
@@ -344,12 +344,12 @@ abstract class SDio {
   });
 }
 
-abstract class SDioMixin implements SDio {
+abstract class CacheApiMixin implements CacheApi {
   /// Default Request config. More see [BaseOptions].
   @override
   BaseOptions options;
 
-  /// Each SDio instance has a interceptor by which you can intercept requests or responses before they are
+  /// Each CacheApi instance has a interceptor by which you can intercept requests or responses before they are
   /// handled by `then` or `catchError`. the [interceptor] field
   /// contains a [RequestInterceptor] and a [ResponseInterceptor] instance.
   final Interceptors _interceptors = Interceptors();
@@ -376,9 +376,9 @@ abstract class SDioMixin implements SDio {
     httpClientAdapter.close(force: force);
   }
 
-  /// Handy method to make http GET request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http GET request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> get<T>(
+  Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic> queryParameters,
     Options options,
@@ -387,7 +387,7 @@ abstract class SDioMixin implements SDio {
     bool storeData = false,
         Duration duration = const Duration(days: 2),
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await request<T>(
         path,
@@ -408,12 +408,12 @@ abstract class SDioMixin implements SDio {
 
         box.put(path + _GET, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(path + _GET);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data['data'],
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -425,16 +425,16 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http GET request, which is a alias of [BaseSDio.request].
+  /// Handy method to make http GET request, which is a alias of [BaseCacheApi.request].
   @override
-  Future<Response<T>> getUri<T>(
+  Future<ApiResponse<T>> getUri<T>(
     Uri uri, {
     Options options,
     CancelToken cancelToken,
     ProgressCallback onReceiveProgress,
     bool storeData = false,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await requestUri<T>(
         uri,
@@ -447,12 +447,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(uri.path + _GET, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(uri.path + _GET);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -464,9 +464,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> post<T>(
+  Future<ApiResponse<T>> post<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -476,7 +476,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await request<T>(
         path,
@@ -492,12 +492,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(path + _POST, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(path + _POST);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -509,9 +509,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http POST request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http POST request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> postUri<T>(
+  Future<ApiResponse<T>> postUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -520,7 +520,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData = false,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await requestUri<T>(
         uri,
@@ -535,12 +535,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(uri.path + _POST, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(uri.path + _POST);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -552,9 +552,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> put<T>(
+  Future<ApiResponse<T>> put<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -564,7 +564,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData = false,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await request<T>(
         path,
@@ -580,12 +580,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(path + _PUT, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(path + _PUT);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -597,9 +597,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PUT request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http PUT request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> putUri<T>(
+  Future<ApiResponse<T>> putUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -608,7 +608,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData = false,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await requestUri<T>(
         uri,
@@ -623,12 +623,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(uri.path + _PUT, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(uri.path + _PUT);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -640,9 +640,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseCacheApi.request].
   @override
-  Future<Response<T>> head<T>(
+  Future<ApiResponse<T>> head<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -659,9 +659,9 @@ abstract class SDioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http HEAD request, which is a alias of [BaseSDio.request].
+  /// Handy method to make http HEAD request, which is a alias of [BaseCacheApi.request].
   @override
-  Future<Response<T>> headUri<T>(
+  Future<ApiResponse<T>> headUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -675,9 +675,9 @@ abstract class SDioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> delete<T>(
+  Future<ApiResponse<T>> delete<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -693,9 +693,9 @@ abstract class SDioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http DELETE request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http DELETE request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> deleteUri<T>(
+  Future<ApiResponse<T>> deleteUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -709,9 +709,9 @@ abstract class SDioMixin implements SDio {
     );
   }
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> patch<T>(
+  Future<ApiResponse<T>> patch<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -721,7 +721,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await request<T>(
         path,
@@ -737,12 +737,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(path + _PATCH, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(path + _PATCH);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -754,9 +754,9 @@ abstract class SDioMixin implements SDio {
     return response;
   }
 
-  /// Handy method to make http PATCH request, which is a alias of  [BaseSDio.request].
+  /// Handy method to make http PATCH request, which is a alias of  [BaseCacheApi.request].
   @override
-  Future<Response<T>> patchUri<T>(
+  Future<ApiResponse<T>> patchUri<T>(
     Uri uri, {
     data,
     Options options,
@@ -765,7 +765,7 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
     bool storeData = false,
   }) async {
-    Response response;
+    ApiResponse response;
     try {
       response = await requestUri<T>(
         uri,
@@ -780,12 +780,12 @@ abstract class SDioMixin implements SDio {
         Map<String, dynamic> data = response.data;
         box.put(uri.path + _PATCH, json.encode(data));
       }
-    } on SDioError catch (e) {
+    } on CacheApiError catch (e) {
       if (storeData && box != null && box.isOpen) {
         String s = box.get(uri.path + _PATCH);
         if (s != null) {
           Map<String, dynamic> data = json.decode(s);
-          Response response1 = new Response(
+          ApiResponse response1 = new ApiResponse(
               data: data,
               statusCode: e?.response?.statusCode,
               statusMessage: "Data from store");
@@ -799,11 +799,11 @@ abstract class SDioMixin implements SDio {
 
   /// Assure the final future state is succeed!
   @override
-  Future<Response<T>> resolve<T>(response) {
+  Future<ApiResponse<T>> resolve<T>(response) {
     if (response is! Future) {
       response = Future.value(response);
     }
-    return response.then<Response<T>>((data) {
+    return response.then<ApiResponse<T>>((data) {
       return assureResponse<T>(data);
     }, onError: (err) {
       // transform 'error' to 'success'
@@ -813,36 +813,36 @@ abstract class SDioMixin implements SDio {
 
   /// Assure the final future state is failed!
   @override
-  Future<Response<T>> reject<T>(err) {
+  Future<ApiResponse<T>> reject<T>(err) {
     if (err is! Future) {
       err = Future.error(err);
     }
-    return err.then<Response<T>>((v) {
+    return err.then<ApiResponse<T>>((v) {
       // transform 'success' to 'error'
-      throw assureSDioError(v);
+      throw assureCacheApiError(v);
     }, onError: (e) {
-      throw assureSDioError(e);
+      throw assureCacheApiError(e);
     });
   }
 
-  /// Lock the current SDio instance.
+  /// Lock the current CacheApi instance.
   ///
-  /// SDio will enqueue the incoming request tasks instead
+  /// CacheApi will enqueue the incoming request tasks instead
   /// send them directly when [interceptor.request] is locked.
   @override
   void lock() {
     interceptors.requestLock.lock();
   }
 
-  /// Unlock the current SDio instance.
+  /// Unlock the current CacheApi instance.
   ///
-  /// SDio instance dequeue the request task。
+  /// CacheApi instance dequeue the request task。
   @override
   void unlock() {
     interceptors.requestLock.unlock();
   }
 
-  ///Clear the current SDio instance waiting queue.
+  ///Clear the current CacheApi instance waiting queue.
   @override
   void clear() {
     interceptors.requestLock.clear();
@@ -858,7 +858,7 @@ abstract class SDioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.download(url,(HttpHeaders responseHeaders){
+  ///   await cacheApi.download(url,(HttpHeaders responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -878,7 +878,7 @@ abstract class SDioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.download(url, './example/flutter.svg',
+  ///     await cacheApi.download(url, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -887,7 +887,7 @@ abstract class SDioMixin implements SDio {
   ///     });
 
   @override
-  Future<Response> download(
+  Future<ApiResponse> download(
     String urlPath,
     savePath, {
     ProgressCallback onReceiveProgress,
@@ -911,7 +911,7 @@ abstract class SDioMixin implements SDio {
   ///  1. A path with String type, eg 'xs.jpg'
   ///  2. A callback `String Function(HttpHeaders responseHeaders)`; for example:
   ///  ```dart
-  ///   await sDio.downloadUri(uri,(HttpHeaders responseHeaders){
+  ///   await cacheApi.downloadUri(uri,(HttpHeaders responseHeaders){
   ///      ...
   ///      return '...';
   ///    });
@@ -929,7 +929,7 @@ abstract class SDioMixin implements SDio {
   ///  you can also disable the compression by specifying the 'accept-encoding' header value as '*'
   ///  to assure the value of `total` argument of `onProgress` is not -1. for example:
   ///
-  ///     await sDio.downloadUri(uri, './example/flutter.svg',
+  ///     await cacheApi.downloadUri(uri, './example/flutter.svg',
   ///     options: Options(headers: {HttpHeaders.acceptEncodingHeader: '*'}),  // disable gzip
   ///     onProgress: (received, total) {
   ///       if (total != -1) {
@@ -937,7 +937,7 @@ abstract class SDioMixin implements SDio {
   ///       }
   ///     });
   @override
-  Future<Response> downloadUri(
+  Future<ApiResponse> downloadUri(
     Uri uri,
     savePath, {
     ProgressCallback onReceiveProgress,
@@ -965,7 +965,7 @@ abstract class SDioMixin implements SDio {
   /// [data] The request data
   /// [options] The request options.
   @override
-  Future<Response<T>> request<T>(
+  Future<ApiResponse<T>> request<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -991,7 +991,7 @@ abstract class SDioMixin implements SDio {
   /// [data] The request data
   /// [options] The request options.
   @override
-  Future<Response<T>> requestUri<T>(
+  Future<ApiResponse<T>> requestUri<T>(
     Uri uri, {
     data,
     CancelToken cancelToken,
@@ -1009,7 +1009,7 @@ abstract class SDioMixin implements SDio {
     );
   }
 
-  Future<Response<T>> _request<T>(
+  Future<ApiResponse<T>> _request<T>(
     String path, {
     data,
     Map<String, dynamic> queryParameters,
@@ -1019,8 +1019,8 @@ abstract class SDioMixin implements SDio {
     ProgressCallback onReceiveProgress,
   }) async {
     if (_closed) {
-      throw SDioError(
-          error: "SDio can't establish new connection after closed.");
+      throw CacheApiError(
+          error: "CacheApi can't establish new connection after closed.");
     }
     options ??= Options();
     if (options is RequestOptions) {
@@ -1050,7 +1050,7 @@ abstract class SDioMixin implements SDio {
     // we can handle the return value of interceptor callback.
     Function _interceptorWrapper(interceptor, bool request) {
       return (data) async {
-        var type = request ? (data is RequestOptions) : (data is Response);
+        var type = request ? (data is RequestOptions) : (data is ApiResponse);
         var lock =
             request ? interceptors.requestLock : interceptors.responseLock;
         if (_isErrorOrException(data) || type) {
@@ -1062,7 +1062,7 @@ abstract class SDioMixin implements SDio {
                   if (!request) data.request = data.request ?? requestOptions;
                   return interceptor(data).then((e) => e ?? data);
                 } else {
-                  throw assureSDioError(data, requestOptions);
+                  throw assureCacheApiError(data, requestOptions);
                 }
               });
             }),
@@ -1078,11 +1078,11 @@ abstract class SDioMixin implements SDio {
     Function _errorInterceptorWrapper(errInterceptor) {
       return (err) {
         return checkIfNeedEnqueue(interceptors.errorLock, () {
-          if (err is! Response) {
-            return errInterceptor(assureSDioError(err, requestOptions))
+          if (err is! ApiResponse) {
+            return errInterceptor(assureCacheApiError(err, requestOptions))
                 .then((e) {
-              if (e is! Response) {
-                throw assureSDioError(e ?? err, requestOptions);
+              if (e is! ApiResponse) {
+                throw assureCacheApiError(e ?? err, requestOptions);
               }
               return e;
             });
@@ -1117,19 +1117,19 @@ abstract class SDioMixin implements SDio {
       future = future.catchError(_errorInterceptorWrapper(interceptor.onError));
     });
 
-    // Normalize errors, we convert error to the SDioError
-    return future.then<Response<T>>((data) {
+    // Normalize errors, we convert error to the CacheApiError
+    return future.then<ApiResponse<T>>((data) {
       return assureResponse<T>(data);
     }).catchError((err) {
       if (err == null || _isErrorOrException(err)) {
-        throw assureSDioError(err, requestOptions);
+        throw assureCacheApiError(err, requestOptions);
       }
       return assureResponse<T>(err, requestOptions);
     });
   }
 
   // Initiate Http requests
-  Future<Response<T>> _dispatchRequest<T>(RequestOptions options) async {
+  Future<ApiResponse<T>> _dispatchRequest<T>(RequestOptions options) async {
     var cancelToken = options.cancelToken;
     ResponseBody responseBody;
     try {
@@ -1141,7 +1141,7 @@ abstract class SDioMixin implements SDio {
       );
       responseBody.headers = responseBody.headers ?? {};
       var headers = Headers.fromMap(responseBody.headers ?? {});
-      var ret = Response(
+      var ret = ApiResponse(
         headers: headers,
         request: options,
         redirects: responseBody.redirects ?? [],
@@ -1171,14 +1171,14 @@ abstract class SDioMixin implements SDio {
       if (statusOk) {
         return checkIfNeedEnqueue(interceptors.responseLock, () => ret);
       } else {
-        throw SDioError(
+        throw CacheApiError(
           response: ret,
           error: 'Http status error [${responseBody.statusCode}]',
-          type: SDioErrorType.RESPONSE,
+          type: CacheApiErrorType.RESPONSE,
         );
       }
     } catch (e) {
-      throw assureSDioError(e, options);
+      throw assureCacheApiError(e, options);
     }
   }
 
@@ -1271,10 +1271,10 @@ abstract class SDioMixin implements SDio {
       if (options.sendTimeout > 0) {
         byteStream.timeout(Duration(milliseconds: options.sendTimeout),
             onTimeout: (sink) {
-          sink.addError(SDioError(
+          sink.addError(CacheApiError(
             request: options,
             error: 'Sending timeout[${options.connectTimeout}ms]',
-            type: SDioErrorType.SEND_TIMEOUT,
+            type: CacheApiErrorType.SEND_TIMEOUT,
           ));
           sink.close();
         });
@@ -1337,25 +1337,25 @@ abstract class SDioMixin implements SDio {
     }
   }
 
-  SDioError assureSDioError(err, [RequestOptions requestOptions]) {
-    SDioError sDioError;
-    if (err is SDioError) {
-      sDioError = err;
+  CacheApiError assureCacheApiError(err, [RequestOptions requestOptions]) {
+    CacheApiError cacheApiError;
+    if (err is CacheApiError) {
+      cacheApiError = err;
     } else {
-      sDioError = SDioError(error: err);
+      cacheApiError = CacheApiError(error: err);
     }
-    sDioError.request = sDioError.request ?? requestOptions;
-    return sDioError;
+    cacheApiError.request = cacheApiError.request ?? requestOptions;
+    return cacheApiError;
   }
 
-  Response<T> assureResponse<T>(response, [RequestOptions requestOptions]) {
-    if (response is Response<T>) {
+  ApiResponse<T> assureResponse<T>(response, [RequestOptions requestOptions]) {
+    if (response is ApiResponse<T>) {
       response.request = response.request ?? requestOptions;
-    } else if (response is! Response) {
-      response = Response<T>(data: response, request: requestOptions);
+    } else if (response is! ApiResponse) {
+      response = ApiResponse<T>(data: response, request: requestOptions);
     } else {
       T data = response.data;
-      response = Response<T>(
+      response = ApiResponse<T>(
         data: data,
         headers: response.headers,
         request: response.request,

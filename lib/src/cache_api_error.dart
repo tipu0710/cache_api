@@ -1,7 +1,7 @@
 import 'options.dart';
 import 'response.dart';
 
-enum SDioErrorType {
+enum CacheApiErrorType {
   /// It occurs when url is opened timeout.
   CONNECT_TIMEOUT,
 
@@ -14,20 +14,20 @@ enum SDioErrorType {
   /// When the server response, but with a incorrect status, such as 404, 503...
   RESPONSE,
 
-  /// When the request is cancelled, sDio will throw a error with this type.
+  /// When the request is cancelled, cacheApi will throw a error with this type.
   CANCEL,
 
   /// Default error type, Some other Error. In this case, you can
-  /// use the SDioError.error if it is not null.
+  /// use the CacheApiError.error if it is not null.
   DEFAULT,
 }
 
-/// SDioError describes the error info  when request failed.
-class SDioError implements Exception {
-  SDioError({
+/// CacheApiError describes the error info  when request failed.
+class CacheApiError implements Exception {
+  CacheApiError({
     this.request,
     this.response,
-    this.type = SDioErrorType.DEFAULT,
+    this.type = CacheApiErrorType.DEFAULT,
     this.error,
   });
 
@@ -36,19 +36,19 @@ class SDioError implements Exception {
 
   /// Response info, it may be `null` if the request can't reach to
   /// the http server, for example, occurring a dns error, network is not available.
-  Response response;
+  ApiResponse response;
 
-  SDioErrorType type;
+  CacheApiErrorType type;
 
   /// The original error/exception object; It's usually not null when `type`
-  /// is SDioErrorType.DEFAULT
+  /// is CacheApiErrorType.DEFAULT
   dynamic error;
 
   String get message => (error?.toString() ?? '');
 
   @override
   String toString() {
-    var msg = 'SDioError [$type]: $message';
+    var msg = 'CacheApiError [$type]: $message';
     if (error is Error) {
       msg += '\n${error.stackTrace}';
     }

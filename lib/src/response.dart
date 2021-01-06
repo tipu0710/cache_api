@@ -4,8 +4,8 @@ import 'headers.dart';
 import 'redirect_record.dart';
 
 /// Response describes the http Response info.
-class Response<T> {
-  Response({
+class ApiResponse<T> {
+  ApiResponse({
     this.data,
     this.headers,
     this.request,
